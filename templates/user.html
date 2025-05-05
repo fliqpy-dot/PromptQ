@@ -62,21 +62,29 @@
 
   <script>
     function fetchCurrentNumber() {
+      // Dynamically fetch the API URL
       const apiUrl = window.location.origin + '/api/current-number';
 
+      // Fetch the current number being served
       fetch(apiUrl)
         .then(res => res.json())
         .then(data => {
+          // Update the displayed number, fallback to "—" if no number is available
           document.getElementById('queue-number').innerText = data.number || "—";
+          // Hide the error message if data is fetched successfully
           document.getElementById('error-message').style.display = 'none';
         })
         .catch(() => {
+          // Display error if fetch fails
           document.getElementById('queue-number').innerText = "Error";
           document.getElementById('error-message').style.display = 'block';
         });
     }
 
+    // Fetch the current number on page load
     fetchCurrentNumber();
+
+    // Set interval to refresh the displayed number every 5 seconds
     setInterval(fetchCurrentNumber, 5000);
   </script>
 </body>

@@ -29,6 +29,7 @@ def enqueue():
     if not item:
         return jsonify({"error": "Missing item parameter"}), 400
     fifo_queue.enqueue(item)
+    print(f"Enqueued item: {item}")  # Log to console for visibility
     return jsonify({"message": f"Enqueued: {item}"}), 200
 
 # Dequeue next number (admin serves someone)
@@ -37,9 +38,11 @@ def dequeue():
     item = fifo_queue.dequeue()
     if item is not None:
         current_number["number"] = item  # ✅ This updates the live view
+        print(f"Dequeued and now serving: {item}")  # Log to console for visibility
         return jsonify({"message": f"Dequeued and now serving: {item}"}), 200
     else:
         current_number["number"] = "—"  # Optional reset
+        print("Queue is empty!")  # Log when the queue is empty
         return jsonify({"message": "Queue is empty!"}), 400
 
 # Clear the queue (admin reset)
@@ -47,6 +50,7 @@ def dequeue():
 def clear():
     fifo_queue.clear()
     current_number["number"] = "—"  # Reset displayed number
+    print("Cleared FIFO Queue!")  # Log reset
     return jsonify({"message": "Cleared FIFO Queue!"}), 200
 
 # View queue status (size only for now)
@@ -67,11 +71,13 @@ def update_number():
     if number is None:
         return jsonify({"error": "Missing number"}), 400
     current_number["number"] = number
+    print(f"Number manually updated to: {number}")  # Log manual update
     return jsonify({"message": "Number updated successfully"}), 200
 
 # User-facing route to fetch currently served number
 @app.route("/api/current-number", methods=["GET"])
 def get_current_number():
+    print(f"Fetching current number: {current_number['number']}")  # Log the current number being served
     return jsonify(current_number)
 
 # Main entry point to start the app, with environment-based port configuration
