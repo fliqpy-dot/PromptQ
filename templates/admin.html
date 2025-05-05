@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>PromptQ - Admin</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to right, #d7d2cc, #304352);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .admin-panel {
+      background: white;
+      padding: 30px 40px;
+      border-radius: 16px;
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+      width: 100%;
+      max-width: 480px;
+    }
+
+    h1 {
+      text-align: center;
+      color: #222;
+      margin-bottom: 20px;
+    }
+
+    label {
+      font-weight: bold;
+      color: #555;
+      display: block;
+      margin-bottom: 8px;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 20px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 12px;
+      font-size: 1rem;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+      background: #4caf50;
+      color: white;
+      margin-bottom: 10px;
+    }
+
+    .btn:hover {
+      background: #43a047;
+    }
+
+    #status, #queue-size {
+      text-align: center;
+      margin-top: 20px;
+      font-weight: bold;
+      color: #333;
+    }
+
+    #status {
+      font-size: 1.2rem;
+    }
+
+    #queue-size {
+      font-size: 1.5rem;
+      color: #4caf50;
+    }
+  </style>
+</head>
+<body>
+  <div class="admin-panel">
+    <h1>PromptQ Admin Panel</h1>
+    <label for="number">Now Serving</label>
+    <input type="text" id="number" placeholder="e.g. Q-101">
+    <button class="btn" onclick="addToQueue()">Add to Queue</button>
+    <button class="btn" onclick="serveNext()">Serve Next</button>
+    <div id="status">Current Display: Loading...</div>
+    <div id="queue-size">Queue: Loading...</div>
+  </div>
+
+  <script>
+    function fetchCurrentNumber() {
+      fetch('/api/current-number')
+        .then(res => res.json())
+        .then(data => {
+          document.getElementById('status').innerText = `Current Display: ${data.number || '—'}`;
+        })
+        .catch(err => {
+          console.error(err);
+          document.getElementById('status').innerText = "Current Display: Error";
+        });
+    }
+
+    function fetchQueueStatus() {
+      fetch('/status')
+        .then(res => res.json())
+        .then(data => {
+          const size = data.fifo_queue.size;
+          document.getElementById('queue-size').innerText = `Queue: ${size > 0 ? size + " item(s)" : "Empty"}`;
+        })
+        .catch(err => {
+          console.error(err);
+          document.getElementById('queue-size').innerText = "Queue: Error";
+        });
+    }
+
+    function addToQueue() {
+      const number = document.getElementById('number').value.trim();
+      if (!number) return alert("Please enter a number!");
+
+      fetch('/enqueue', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ item: number })
+      })
+      .then(res => res.json())
+      .then(data => {
+        console.log(data.message);
+        document.getElementById('number').value = "";
+        fetchQueueStatus();
+      })
+      .catch(err => {
+        console.error(err);
+        alert("Failed to add to queue.");
+      });
+    }
+
+    function serveNext() {
+      fetch('/dequeue', {
+        method: 'POST'
+      })
+      .then(res => res.json())
+      .then(data => {
+        fetchCurrentNumber();
+        fetchQueueStatus();
+      })
+      .catch(err => {
+        console.error(err);
+        alert("Failed to serve next.");
+      });
+    }
+
+    // Initial load
+    fetchCurrentNumber();
+    fetchQueueStatus();
+
+    // Optional: refresh status every 5 seconds
+    setInterval(() => {
+      fetchCurrentNumber();
+      fetchQueueStatus();
+    }, 5000);
+  </script>
+</body>
+</html>

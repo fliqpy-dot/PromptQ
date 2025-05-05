@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>PromptQ - Now Serving</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(to bottom, #f5f7fa, #c3cfe2);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+
+    .container {
+      text-align: center;
+      background: white;
+      padding: 50px 30px;
+      border-radius: 20px;
+      box-shadow: 0 15px 30px rgba(0, 0, 0, 0.1);
+      width: 90%;
+      max-width: 480px;
+    }
+
+    h1 {
+      margin-bottom: 15px;
+      font-size: 3rem;
+      color: #2e3c43;
+    }
+
+    .label {
+      font-size: 1.5rem;
+      color: #607d8b;
+      margin-bottom: 10px;
+    }
+
+    .queue-number {
+      font-size: 6rem;
+      font-weight: bold;
+      color: #4caf50;
+      letter-spacing: 2px;
+      margin-top: 5px;
+    }
+
+    .error {
+      color: red;
+      font-size: 1.2rem;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>PromptQ</h1>
+    <div class="label">Now Serving</div>
+    <div id="queue-number" class="queue-number">...</div>
+    <div id="error-message" class="error" style="display: none;">Error fetching data</div>
+  </div>
+
+  <script>
+    function fetchCurrentNumber() {
+      fetch('/api/current-number')
+        .then(res => res.json())
+        .then(data => {
+          // If no number is available, display the fallback value "—"
+          document.getElementById('queue-number').innerText = data.number || "—";
+          // Hide error message if data is fetched successfully
+          document.getElementById('error-message').style.display = 'none';
+        })
+        .catch(() => {
+          // If error occurs, display error message
+          document.getElementById('queue-number').innerText = "Error";
+          document.getElementById('error-message').style.display = 'block';
+        });
+    }
+
+    // Fetch the current number when the page loads
+    fetchCurrentNumber();
+
+    // Set an interval to refresh the displayed number every 5 seconds
+    setInterval(fetchCurrentNumber, 5000);
+  </script>
+</body>
+</html>
