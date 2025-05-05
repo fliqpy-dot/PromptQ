@@ -74,6 +74,8 @@ def update_number():
 def get_current_number():
     return jsonify(current_number)
 
+# Main entry point to start the app, with environment-based port configuration
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))  # Default to 5000 for local development, Railway will provide its port
+    print(f"Starting app on port {port}")  # Log the port being used
     app.run(host="0.0.0.0", port=port, debug=True)
